@@ -1,4 +1,4 @@
-// map to nicely format choices in the console
+// map to nicely format choices in the messages
 const choices = {
   rock: 'Rock',
   paper: 'Paper',
@@ -12,6 +12,15 @@ function computerPlay() {
 
   return answers[index];
 }
+
+let playerScore = 0;
+let computerScore = 0;
+const playerScoreSpan = document.querySelector('#player-score');
+const computerScoreSpan = document.querySelector('#computer-score');
+const images = document.querySelectorAll('img');
+images.forEach((img) => {
+  img.addEventListener('click', game);
+});
 
 // ask the player to input a choice
 // if the choice is not valid ask again
@@ -37,7 +46,7 @@ function composeMessage(condition, playerSelection, computerSelection) {
   }
 }
 
-// check the round's winned and returns a formatted message
+// checks the round's winned and returns a formatted message
 function playRound(playerSelection, computerSelection) {
   let result = 'draw';
 
@@ -58,38 +67,80 @@ function playRound(playerSelection, computerSelection) {
   return composeMessage(result, playerSelection, computerSelection);
 }
 
-function game() {
-  let games = 0;
-  let playerScore = 0;
-  let computerScore = 0;
-  while (games < 5) {
-    games++;
-    const playerSelection = humanPlay();
-    const computerSelection = computerPlay();
-
-    const result = playRound(playerSelection, computerSelection);
-    if (result.includes('Win')) {
-      playerScore++;
-    }
-    if (result.includes('Lose')) {
-      computerScore++;
-    }
-    console.log(result);
+function updateScore(player) {
+  if (player === 'player') {
+    playerScoreSpan.textContent = playerScore;
   }
 
-  let finalResult;
-  if (playerScore > computerScore) {
-    finalResult = `You Win`;
-  } else if (playerScore < computerScore) {
-    finalResult = 'You Lose';
-  } else {
-    finalResult = 'Tie';
+  if (player === 'computer') {
+    computerScoreSpan.textContent = computerScore;
   }
-
-  console.log(
-    `Game Over!, Results: ${playerScore} : ${computerScore} - ${finalResult}! Reload the page to play again`
-  );
 }
 
-// start the game
-game();
+function removeMessageAndButton() {
+  const previousMessage = document.querySelector('#message');
+  const reset = document.querySelector('#reset');
+  if (previousMessage) {
+    document.body.removeChild(previousMessage);
+  }
+  if (reset) {
+    document.body.removeChild(reset);
+  }
+}
+
+function displayMessage(result) {
+  removeMessageAndButton();
+  const el = document.createElement('h2');
+  el.id = 'message';
+  el.textContent = result;
+  el.style.marginTop = '50px';
+  document.body.appendChild(el);
+}
+
+function showResetButton() {
+  const btn = document.createElement('button');
+  btn.id = 'reset';
+  btn.onclick = resetGame;
+  btn.textContent = 'Play again?';
+  document.body.appendChild(btn);
+}
+
+function resetGame() {
+  playerScore = 0;
+  computerScore = 0;
+  updateScore('player');
+  updateScore('computer');
+  removeMessageAndButton();
+}
+
+function game(e) {
+  const playerSelection = e.target.id;
+  const computerSelection = computerPlay();
+  const result = playRound(playerSelection, computerSelection);
+
+  if (result.includes('Win')) {
+    playerScore++;
+    updateScore('player');
+  }
+  if (result.includes('Lose')) {
+    computerScore++;
+    updateScore('computer');
+  }
+  displayMessage(result);
+  if (playerScore === 5 || computerScore === 5) {
+    let finalResult;
+    if (playerScore > computerScore) {
+      finalResult = `You Win`;
+    } else if (playerScore < computerScore) {
+      finalResult = 'You Lose';
+    } else {
+      finalResult = 'Tie';
+    }
+
+    const playAgain = confirm(
+      `Game Over!, Results: ${playerScore} : ${computerScore} - ${finalResult}! Play again?`
+    );
+
+    playAgain ? resetGame() : showResetButton();
+  }
+}
