@@ -5,7 +5,7 @@ const choices = {
   scissors: 'Scissors',
 };
 
-// get a random
+// get a random computer choice
 function computerPlay() {
   const answers = Object.keys(choices);
   const index = Math.floor(Math.random() * answers.length);
@@ -21,19 +21,6 @@ const images = document.querySelectorAll('img');
 images.forEach((img) => {
   img.addEventListener('click', game);
 });
-
-// ask the player to input a choice
-// if the choice is not valid ask again
-function humanPlay() {
-  let userInput;
-  while (!Object.keys(choices).includes(userInput)) {
-    userInput = (
-      prompt('Type your anser: Rock / Paper / Scissors') || ''
-    ).toLowerCase();
-  }
-
-  return userInput;
-}
 
 // compose a user friendly message
 function composeMessage(condition, playerSelection, computerSelection) {
